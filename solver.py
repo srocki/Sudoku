@@ -1,5 +1,5 @@
 class Cell():
-  value: int = None
+  value: int = 0
   row = None
   col = None
   group = None
@@ -27,7 +27,7 @@ class Cell():
     self.group = group
 
   def remove_option(self, value):
-    if self.value is None:
+    if self.value == 0:
       if value in self.options:
         old_options = self.options.copy()
         self.options.remove(value)
@@ -37,7 +37,7 @@ class Cell():
         self.set_value(self.options[0])
 
   def __str__(self):
-    if self.value is None:
+    if self.value == 0:
       return str(self.options)
     return str(self.value)
 
@@ -105,7 +105,7 @@ class Group():
 class Grid():
 
   def __init__(self, *args):
-    # setup the grid with None's first
+    # setup the empty grid first
     self.cells = [Cell(x) for x in range(len(args))]
 
     # Create rows
@@ -132,7 +132,7 @@ class Grid():
         self.groups.append(group)
 
     for ii in range(len(args)):
-      if not args[ii] is None:
+      if not args[ii] == 0:
         self.cells[ii].set_value(args[ii])
 
   def __str__(self):
@@ -141,11 +141,11 @@ class Grid():
 
 if __name__ == '__main__':
   # Create the grid
-  g = Grid(None, 7, None, 1, None, 5, None, 4, None, 6, None, 4, 9, None, 2, 5,
-           None, 1, None, 1, None, 6, None, 4, None, 3, None, 4, 2, 8, None,
-           None, None, 1, 7, 6, None, None, None, None, None, None, None, None,
-           None, 7, 6, 9, None, None, None, 3, 5, 4, None, 4, None, 3, None, 7,
-           None, 2, None, 2, None, 1, 4, None, 9, 7, None, 3, None, 9, None, 2,
-           None, 8, None, 1, None)
+  g = Grid(0, 7, 0, 1, 0, 5, 0, 4, 0, 6, 0, 4, 9, 0, 2, 5,
+           0, 1, 0, 1, 0, 6, 0, 4, 0, 3, 0, 4, 2, 8, 0,
+           0, 0, 1, 7, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 7, 6, 9, 0, 0, 0, 3, 5, 4, 0, 4, 0, 3, 0, 7,
+           0, 2, 0, 2, 0, 1, 4, 0, 9, 7, 0, 3, 0, 9, 0, 2,
+           0, 8, 0, 1, 0)
   print(g)
 
