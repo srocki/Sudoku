@@ -57,9 +57,15 @@ class Row():
   def remove_option(self, value):
     for cell in self.cells:
       cell.remove_option(value)
-
+  
+  def group_str(self, start, end):
+    return ','.join([str(x) for x in self.cells[start:end]])
+    
   def __str__(self):
-    return ','.join([str(x) for x in self.cells])
+    g1 = self.group_str(0,3)
+    g2 = self.group_str(3,6)
+    g3 = self.group_str(6,9)
+    return f'|{g1}|{g2}|{g3}|'
 
 
 class Col():
@@ -134,9 +140,18 @@ class Grid():
     for ii in range(len(args)):
       if not args[ii] == 0:
         self.cells[ii].set_value(args[ii])
+  
+  def group_str(self, start, end):
+    return '\n'.join([str(x) for x in self.rows[start:end]])
 
   def __str__(self):
-    return '_' * 19 + '\n' + '|' + '|\n|'.join([str(x) for x in self.rows]) + '|' + '\n' + '-' * 19
+    header = '_' * 19
+    footer = '-' * 19
+    g1 = self.group_str(0, 3)
+    g2 = self.group_str(3, 6)
+    g3 = self.group_str(6, 9)
+    sep = '-' * 19
+    return f'{header}\n{g1}\n{sep}\n{g2}\n{sep}\n{g3}\n{footer}'
 
 
 if __name__ == '__main__':
