@@ -1,3 +1,5 @@
+import csv
+
 class Cell():
   value: int = 0
   row = None
@@ -38,7 +40,7 @@ class Cell():
 
   def __str__(self):
     if self.value == 0:
-      return str(self.options)
+      return '(' + ','.join([str(x) for x in self.options]) + ')'
     return str(self.value)
 
 
@@ -57,6 +59,18 @@ class Row():
   def remove_option(self, value):
     for cell in self.cells:
       cell.remove_option(value)
+    # find indices of each number
+    indices = {}
+    for ii in range(1, 10):
+      for cell in self.cells:
+        if ii in cell.options:
+          if not ii in indices:
+            indices[ii] = []
+          indices[ii].append(cell)
+    for key, value in indices.items():
+      if (len(value) == 1):
+        #print(key, str(value[0]))
+        value[0].set_value(key)
   
   def group_str(self, start, end):
     return ','.join([str(x) for x in self.cells[start:end]])
@@ -83,6 +97,19 @@ class Col():
   def remove_option(self, value):
     for cell in self.cells:
       cell.remove_option(value)
+    # find indices of each number
+    indices = {}
+    for ii in range(1, 10):
+      for cell in self.cells:
+        if ii in cell.options:
+          if not ii in indices:
+            indices[ii] = []
+          indices[ii].append(cell)
+    for key, value in indices.items():
+      if (len(value) == 1):
+        #print(key, str(value[0]))
+        value[0].set_value(key)
+      
 
   def __str__(self):
     return ','.join([str(x) for x in self.cells])
@@ -103,6 +130,18 @@ class Group():
   def remove_option(self, value):
     for cell in self.cells:
       cell.remove_option(value)
+    # find indices of each number
+    indices = {}
+    for ii in range(1, 10):
+      for cell in self.cells:
+        if ii in cell.options:
+          if not ii in indices:
+            indices[ii] = []
+          indices[ii].append(cell)
+    for key, value in indices.items():
+      if (len(value) == 1):
+        #print(key, str(value[0]))
+        value[0].set_value(key)
 
   def __str__(self):
     return ','.join([str(x) for x in self.cells])
@@ -110,7 +149,7 @@ class Group():
 
 class Grid():
 
-  def __init__(self, *args):
+  def __init__(self, args):
     # setup the empty grid first
     self.cells = [Cell(x) for x in range(len(args))]
 
@@ -152,15 +191,22 @@ class Grid():
     g3 = self.group_str(6, 9)
     sep = '-' * 19
     return f'{header}\n{g1}\n{sep}\n{g2}\n{sep}\n{g3}\n{footer}'
+    
 
+def importCSV(filename:str):
+  data = []
+  with open(f'{filename}.csv', 'rt') as csvfile:
+    csvreader = csv.reader(csvfile)
+    for row in csvreader:
+      for ss in row:
+        if ss == '':
+          ss = '0'
+        data.append(int(ss))
+    return data
 
 if __name__ == '__main__':
   # Create the grid
-  g = Grid(0, 7, 0, 1, 0, 5, 0, 4, 0, 6, 0, 4, 9, 0, 2, 5,
-           0, 1, 0, 1, 0, 6, 0, 4, 0, 3, 0, 4, 2, 8, 0,
-           0, 0, 1, 7, 6, 0, 0, 0, 0, 0, 0, 0, 0,
-           0, 7, 6, 9, 0, 0, 0, 3, 5, 4, 0, 4, 0, 3, 0, 7,
-           0, 2, 0, 2, 0, 1, 4, 0, 9, 7, 0, 3, 0, 9, 0, 2,
-           0, 8, 0, 1, 0)
+  data = importCSV('51')
+  g = Grid(data)
   print(g)
 
