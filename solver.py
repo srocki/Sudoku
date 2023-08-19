@@ -1,6 +1,16 @@
 import csv
 import math
 
+class Tracer():
+  def __init__(self):
+    pass
+  
+  def trace(self, cell, msg):
+    print(f'[{cell.i},{cell.j}]: {msg}')
+
+
+tracer = Tracer()
+
 class Cell():
   value: int = 0
   row = None
@@ -14,7 +24,7 @@ class Cell():
     self.j = math.floor(index / 9)
 
   def set_value(self, value: int):
-    print(f'Cell[{self.i}, {self.j}] -> {value}')
+    tracer.trace(self, f'-> {value}')
     self.value = value
     self.options = []
     # iterate the rows/columns/groups and remove impossible options
@@ -36,9 +46,9 @@ class Cell():
       if value in self.options:
         old_options = self.options.copy()
         self.options.remove(value)
-        print(f'Cell[{self.i}, {self.j}] {old_options} -> {self.options}')
+        tracer.trace(self, f'{old_options} -> {self.options}')
       if len(self.options) == 1:
-        print(f'Found single entry option list for cell [{self.i}, {self.j}]')
+        tracer.trace(self, f'Found single entry option list')
         self.set_value(self.options[0])
 
   def __str__(self):
@@ -209,7 +219,7 @@ def importCSV(filename:str):
 
 if __name__ == '__main__':
   # Create the grid
-  data = importCSV('49')
+  data = importCSV('51')
   g = Grid(data)
   print(g)
 
