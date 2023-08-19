@@ -1,4 +1,5 @@
 import csv
+import math
 
 class Cell():
   value: int = 0
@@ -9,9 +10,11 @@ class Cell():
   def __init__(self, index):
     self.options = [x + 1 for x in range(9)]
     self.index = index
+    self.i = index % 9
+    self.j = math.floor(index / 9)
 
   def set_value(self, value: int):
-    print(f'Cell[{self.index}] -> {value}')
+    print(f'Cell[{self.i}, {self.j}] -> {value}')
     self.value = value
     self.options = []
     # iterate the rows/columns/groups and remove impossible options
@@ -33,9 +36,9 @@ class Cell():
       if value in self.options:
         old_options = self.options.copy()
         self.options.remove(value)
-        print(f'Cell[{self.index}] {old_options} -> {self.options}')
+        print(f'Cell[{self.i}, {self.j}] {old_options} -> {self.options}')
       if len(self.options) == 1:
-        print(f'Found single entry option list for cell [{self.index}]')
+        print(f'Found single entry option list for cell [{self.i}, {self.j}]')
         self.set_value(self.options[0])
 
   def __str__(self):
@@ -206,7 +209,7 @@ def importCSV(filename:str):
 
 if __name__ == '__main__':
   # Create the grid
-  data = importCSV('51')
+  data = importCSV('49')
   g = Grid(data)
   print(g)
 
