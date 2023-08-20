@@ -53,7 +53,7 @@ class Cell:
 
     def __str__(self):
         if self.value == 0:
-            return '(' + ','.join([str(x) for x in self.options]) + ')'
+            return '(' + ';'.join([str(x) for x in self.options]) + ')'
         return str(self.value)
 
 
@@ -225,7 +225,7 @@ def import_csv(filename: str):
 
 if __name__ == '__main__':
     # Create the grid
-    csv_data = import_csv('51')
+    csv_data = import_csv('167')
     g = Grid(csv_data)
     print(g)
     while g.solve():
