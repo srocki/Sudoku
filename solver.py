@@ -6,7 +6,8 @@ class Tracer:
     def __init__(self):
         pass
 
-    def trace(self, cell, msg):
+    @staticmethod
+    def trace(cell, msg):
         print(f'[{cell.i},{cell.j}]: {msg}')
 
 
@@ -105,9 +106,6 @@ class Col:
                     if ii not in indices:
                         indices[ii] = []
                     indices[ii].append(cell)
-        #for key, value in indices.items():
-            #if len(value) == 1:
-                #value[0].set_value(key)
 
     def __str__(self):
         return ','.join([str(x) for x in self.cells])
@@ -128,17 +126,6 @@ class Group:
     def remove_option(self, value):
         for cell in self.cells:
             cell.remove_option(value)
-        # find indices of each number
-        #indices = {}
-        #for ii in range(1, 10):
-            #for cell in self.cells:
-                #if ii in cell.options:
-                    #if ii not in indices:
-                        #indices[ii] = []
-                    #indices[ii].append(cell)
-        #for key, value in indices.items():
-            #if len(value) == 1:
-                #value[0].set_value(key, 'Only #possibility in group')
 
     def __str__(self):
         return ','.join([str(x) for x in self.cells])
@@ -195,7 +182,8 @@ class Grid:
         
         return updated
 
-    def find_possibilities(self, coll, type: str):
+    @staticmethod
+    def find_possibilities(coll, entity_type: str):
         updated = False
         indices = {}
         for ii in range(1, 10):
@@ -206,7 +194,7 @@ class Grid:
                     indices[ii].append(cell)
         for key, value in indices.items():
             if len(value) == 1:
-                value[0].set_value(key, f'only possibility in {type}')
+                value[0].set_value(key, f'only possibility in {entity_type}')
                 updated = True
         return updated
 
@@ -240,5 +228,5 @@ if __name__ == '__main__':
     csv_data = import_csv('51')
     g = Grid(csv_data)
     print(g)
-    while(g.solve()):
+    while g.solve():
         print(g)
