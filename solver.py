@@ -22,11 +22,11 @@ class Cell:
     def __init__(self, index):
         self.options = [x + 1 for x in range(9)]
         self.index = index
-        self.i = index % 9
-        self.j = math.floor(index / 9)
+        self.i = math.floor(index / 9)
+        self.j = index % 9
 
-    def set_value(self, value: int):
-        tracer.trace(self, f'-> {value}')
+    def set_value(self, value: int, reason:  str):
+        tracer.trace(self, f'-> {value} [{reason}]')
         self.value = value
         self.options = []
         # iterate the rows/columns/groups and remove impossible options
@@ -49,9 +49,6 @@ class Cell:
                 old_options = self.options.copy()
                 self.options.remove(value)
                 tracer.trace(self, f'{old_options} -> {self.options}')
-            if len(self.options) == 1:
-                tracer.trace(self, f'Found single entry option list')
-                self.set_value(self.options[0])
 
     def __str__(self):
         if self.value == 0:
@@ -74,18 +71,6 @@ class Row:
     def remove_option(self, value):
         for cell in self.cells:
             cell.remove_option(value)
-        # find indices of each number
-        indices = {}
-        for ii in range(1, 10):
-            for cell in self.cells:
-                if ii in cell.options:
-                    if ii not in indices:
-                        indices[ii] = []
-                    indices[ii].append(cell)
-        for key, value in indices.items():
-            if len(value) == 1:
-                # print(key, str(value[0]))
-                value[0].set_value(key)
 
     def group_str(self, start, end):
         return ','.join([str(x) for x in self.cells[start:end]])
@@ -120,10 +105,9 @@ class Col:
                     if ii not in indices:
                         indices[ii] = []
                     indices[ii].append(cell)
-        for key, value in indices.items():
-            if len(value) == 1:
-                # print(key, str(value[0]))
-                value[0].set_value(key)
+        #for key, value in indices.items():
+            #if len(value) == 1:
+                #value[0].set_value(key)
 
     def __str__(self):
         return ','.join([str(x) for x in self.cells])
@@ -145,17 +129,16 @@ class Group:
         for cell in self.cells:
             cell.remove_option(value)
         # find indices of each number
-        indices = {}
-        for ii in range(1, 10):
-            for cell in self.cells:
-                if ii in cell.options:
-                    if ii not in indices:
-                        indices[ii] = []
-                    indices[ii].append(cell)
-        for key, value in indices.items():
-            if len(value) == 1:
-                # print(key, str(value[0]))
-                value[0].set_value(key)
+        #indices = {}
+        #for ii in range(1, 10):
+            #for cell in self.cells:
+                #if ii in cell.options:
+                    #if ii not in indices:
+                        #indices[ii] = []
+                    #indices[ii].append(cell)
+        #for key, value in indices.items():
+            #if len(value) == 1:
+                #value[0].set_value(key, 'Only #possibility in group')
 
     def __str__(self):
         return ','.join([str(x) for x in self.cells])
@@ -191,7 +174,41 @@ class Grid:
 
         for ii in range(len(args)):
             if not args[ii] == 0:
-                self.cells[ii].set_value(args[ii])
+                self.cells[ii].set_value(args[ii], 'Initial')
+    
+    def solve(self):
+        updated = False
+        # cells which have only one option
+        for cell in self.cells:
+            if len(cell.options) == 1:
+                cell.set_value(cell.options[0], 'only option')
+                updated = True
+        
+        for row in self.rows:
+            updated = self.find_possibilities(row, 'row') or updated
+        
+        for col in self.cols:
+            updated = self.find_possibilities(col, 'col') or updated
+        
+        for group in self.groups:
+            updated = self.find_possibilities(group, 'group') or updated
+        
+        return updated
+
+    def find_possibilities(self, coll, type: str):
+        updated = False
+        indices = {}
+        for ii in range(1, 10):
+            for cell in coll.cells:
+                if ii in cell.options:
+                    if ii not in indices:
+                        indices[ii] = []
+                    indices[ii].append(cell)
+        for key, value in indices.items():
+            if len(value) == 1:
+                value[0].set_value(key, f'only possibility in {type}')
+                updated = True
+        return updated
 
     def group_str(self, start, end):
         return '\n'.join([str(x) for x in self.rows[start:end]])
@@ -223,3 +240,5 @@ if __name__ == '__main__':
     csv_data = import_csv('51')
     g = Grid(csv_data)
     print(g)
+    while(g.solve()):
+        print(g)
