@@ -200,8 +200,32 @@ class Grid:
 
     def group_str(self, start, end):
         return '\n'.join([str(x) for x in self.rows[start:end]])
+        
+    def pad_cell_text(self, cell, length):
+        cell_str = str(cell)
+        blank_str = ' ' * length
+        full_str = blank_str + cell_str
+        return full_str[-length:]
 
     def __str__(self):
+        str_lengths = [max([len(str(row.cells[ii])) for row in self.rows]) for ii in range(9)]
+        print(str_lengths)
+        
+        header = '_' * (sum(str_lengths) + 10)
+        separator = '-' * (sum(str_lengths) + 10)
+        
+        print(header)
+        
+        for ii in range(len(self.rows)):
+            row = self.rows[ii]
+            row_strings = []
+            for jj in range(len(row.cells)):
+                cell_str = self.pad_cell_text(row.cells[jj], str_lengths[jj])
+                row_strings.append(cell_str)
+            print(','.join(row_strings))
+        print(separator)
+                
+        
         header = '_' * 19
         footer = '-' * 19
         g1 = self.group_str(0, 3)
@@ -225,7 +249,7 @@ def import_csv(filename: str):
 
 if __name__ == '__main__':
     # Create the grid
-    csv_data = import_csv('167')
+    csv_data = import_csv('51')
     g = Grid(csv_data)
     print(g)
     while g.solve():
