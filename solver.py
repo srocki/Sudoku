@@ -164,6 +164,7 @@ class Grid:
                 self.cells[ii].set_value(args[ii], 'Initial')
     
     def solve(self):
+        # TODO: RCP: Extract these and inplement the rules from: https://sudoku.com/sudoku-rules
         updated = False
         # cells which have only one option
         for cell in self.cells:
