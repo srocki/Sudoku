@@ -185,6 +185,8 @@ class Grid:
     @staticmethod
     def find_possibilities(coll, entity_type: str):
         updated = False
+        
+        # Find where the is only one place for a number with the given collection
         indices = {}
         for ii in range(1, 10):
             for cell in coll.cells:
@@ -196,6 +198,28 @@ class Grid:
             if len(value) == 1:
                 value[0].set_value(key, f'only possibility in {entity_type}')
                 updated = True
+        
+        # Find where we have pairs (or triples, etc) in the collection that must contain all of the numbers in the pair (or triple...)
+        def make_key(options):
+            return ','.join([str(x) for x in options])
+        
+        groups = {}
+        for cell in coll.cells:
+            if len(cell.options) > 1:
+                if make_key(cell.options) not in groups:
+                    groups[make_key(cell.options)] = 0
+                groups[make_key(cell.options)] = groups[make_key(cell.options)] + 1
+        for key, value in groups.items():
+            keys = [int(x) for x in key.split(',')]
+            if len(keys) == value:
+                # we have items we can remove from elements in the collection
+                for cell in coll.cells:
+                    if len(cell.options) > 1:
+                        if not cell.options == keys:
+                            for val in keys:
+                                if val in cell.options:
+                                    cell.remove_option(val)
+                                    updated = True
         return updated
 
     def cells_str(self, str_lengths, row, start, end):
@@ -222,7 +246,6 @@ class Grid:
 
     def __str__(self):
         str_lengths = [max([len(str(row.cells[ii])) for row in self.rows]) for ii in range(9)]
-        print(str_lengths)
         
         header = '_' * (sum(str_lengths) + 10)
         sep = '-' * (sum(str_lengths) + 10)
