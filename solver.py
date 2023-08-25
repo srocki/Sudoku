@@ -180,7 +180,30 @@ class Grid:
         
         for group in self.groups:
             updated = self.find_possibilities(group, 'group') or updated
-        
+
+        # X-Wing
+        # Iterate the rows and find the indices of each number in the options
+        rowdata = {}
+        for ii_row in range(9):
+            rowdata[ii_row] = {}
+            for num in range(1, 10):
+                rowdata[ii_row][num] = []
+                for ii_cells in range(9):
+                    if num in self.rows[ii_row].cells[ii_cells].options:
+                        rowdata[ii_row][num].append(ii_cells)
+                # remove all rowdata entries that are not 2 elements long
+                rowdata[ii_row] = {k: v for k, v in rowdata[ii_row].items() if len(v) == 2}
+
+        for num in range(1, 10):
+            numdata = {}
+            for ii_row in range(9):
+                if num in rowdata[ii_row]:
+                    numdata[ii_row] = rowdata[ii_row][num]
+            if len(numdata) == 2:
+                value_list = list(numdata.values())
+                if value_list[0] == value_list[1]:
+                    print(f"Found X-wing in rows {list(numdata.keys())} and cols {value_list[0]}")
+
         return updated
 
     @staticmethod
@@ -221,6 +244,7 @@ class Grid:
                                 if val in cell.options:
                                     cell.remove_option(val)
                                     updated = True
+
         return updated
 
     def cells_str(self, str_lengths, row, start, end):
