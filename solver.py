@@ -26,7 +26,7 @@ class Cell:
         self.i = math.floor(index / 9)
         self.j = index % 9
 
-    def set_value(self, value: int, reason:  str):
+    def set_value(self, value: int, reason: str):
         tracer.trace(self, f'-> {value} [{reason}]')
         self.value = value
         self.options = []
@@ -162,7 +162,7 @@ class Grid:
         for ii in range(len(args)):
             if not args[ii] == 0:
                 self.cells[ii].set_value(args[ii], 'Initial')
-    
+
     def solve(self):
         # TODO: RCP: Extract these and inplement the rules from: https://sudoku.com/sudoku-rules
         updated = False
@@ -171,17 +171,25 @@ class Grid:
             if len(cell.options) == 1:
                 cell.set_value(cell.options[0], 'only option')
                 updated = True
-        
+
         for row in self.rows:
             updated = self.find_possibilities(row, 'row') or updated
-        
+
         for col in self.cols:
             updated = self.find_possibilities(col, 'col') or updated
-        
+
         for group in self.groups:
             updated = self.find_possibilities(group, 'group') or updated
 
         # X-Wing
+        updated = self.process_x_wings() or updated
+
+        return updated
+
+    @staticmethod
+    def find_x_wings(rows):
+        res = []
+
         # Iterate the rows and find the indices of each number in the options
         rowdata = {}
         for ii_row in range(9):
@@ -189,7 +197,7 @@ class Grid:
             for num in range(1, 10):
                 rowdata[ii_row][num] = []
                 for ii_cells in range(9):
-                    if num in self.rows[ii_row].cells[ii_cells].options:
+                    if num in rows[ii_row].cells[ii_cells].options:
                         rowdata[ii_row][num].append(ii_cells)
                 # remove all rowdata entries that are not 2 elements long
                 rowdata[ii_row] = {k: v for k, v in rowdata[ii_row].items() if len(v) == 2}
@@ -202,14 +210,30 @@ class Grid:
             if len(numdata) == 2:
                 value_list = list(numdata.values())
                 if value_list[0] == value_list[1]:
-                    print(f"Found X-wing in rows {list(numdata.keys())} and cols {value_list[0]}")
+                    print(f"Found X-wing for number [{num}] in rows {list(numdata.keys())} and cols {value_list[0]}")
+                    res.append((num, list(numdata.keys()), value_list[0]))
+        return res
 
+    def process_x_wings(self) -> bool:
+        x_wings = Grid.find_x_wings(self.rows)
+        updated = False
+        for x_wing in x_wings:
+            num = x_wing[0]
+            rows = x_wing[1]
+            cols = x_wing[2]
+            for ii_col in cols:
+                col = self.cols[ii_col]
+                for ii_row in range(9):
+                    if ii_row not in rows:
+                        if num in col.cells[ii_row].options:
+                            col.cells[ii_row].remove_option(num)
+                            updated = True
         return updated
 
     @staticmethod
     def find_possibilities(coll, entity_type: str):
         updated = False
-        
+
         # Find where the is only one place for a number with the given collection
         indices = {}
         for ii in range(1, 10):
@@ -222,11 +246,11 @@ class Grid:
             if len(value) == 1:
                 value[0].set_value(key, f'only possibility in {entity_type}')
                 updated = True
-        
+
         # Find where we have pairs (or triples, etc) in the collection that must contain all of the numbers in the pair (or triple...)
         def make_key(options):
             return ','.join([str(x) for x in options])
-        
+
         groups = {}
         for cell in coll.cells:
             if len(cell.options) > 1:
@@ -253,17 +277,18 @@ class Grid:
             cell_str = self.pad_cell_text(row.cells[jj], str_lengths[jj])
             row_strings.append(cell_str)
         return ','.join(row_strings)
-        
+
     def row_str(self, str_lengths, row):
         g1 = self.cells_str(str_lengths, row, 0, 3)
         g2 = self.cells_str(str_lengths, row, 3, 6)
         g3 = self.cells_str(str_lengths, row, 6, 9)
         return f'|{g1}|{g2}|{g3}|'
-        
+
     def group_str(self, str_lengths, start, end):
         return '\n'.join([self.row_str(str_lengths, x) for x in self.rows[start:end]])
-        
-    def pad_cell_text(self, cell, length):
+
+    @staticmethod
+    def pad_cell_text(cell, length):
         cell_str = str(cell)
         blank_str = ' ' * length
         full_str = blank_str + cell_str
@@ -271,7 +296,7 @@ class Grid:
 
     def __str__(self):
         str_lengths = [max([len(str(row.cells[ii])) for row in self.rows]) for ii in range(9)]
-        
+
         header = '_' * (sum(str_lengths) + 10)
         sep = '-' * (sum(str_lengths) + 10)
         g1 = self.group_str(str_lengths, 0, 3)
