@@ -1,5 +1,7 @@
 import csv
 import math
+import copy
+import itertools
 
 
 class Tracer:
@@ -164,7 +166,7 @@ class Grid:
                 self.cells[ii].set_value(args[ii], 'Initial')
 
     def solve(self):
-        # TODO: RCP: Extract these and inplement the rules from: https://sudoku.com/sudoku-rules
+        # TODO: RCP: Extract these and inplement the rules from: https://www.sudokuwiki.org/Naked_Candidates
         updated = False
         # cells which have only one option
         for cell in self.cells:
@@ -231,8 +233,31 @@ class Grid:
         return updated
 
     @staticmethod
+    def find_naked_triples(coll, entity_type):
+        updated = False
+        # Find all elements of size 2 or 3
+        # Take rach set of three and work out the unique set of choices.  If the count of choices is 3 then we have a hidden triple
+        relevant_cells = [x for x in coll if len(x.options) == 2 or len(x.options) == 3]
+        combinations = itertools.combinations(relevant_cells, 3)
+        for combination in combinations:
+            sets = [set(x.options) for x in combination]
+            #print(sets)
+            union_set = sets[0].union(sets[1]).union(sets[2])
+            if not len(union_set) == 3:
+                continue
+            print(f'Found naked triple {union_set} in {entity_type}')
+            for cell in coll:
+                if cell in combination:
+                    continue
+                for to_remove in union_set:
+                    updated = cell.remove_option(to_remove) or updated
+        return updated
+
+    @staticmethod
     def find_possibilities(coll, entity_type: str):
         updated = False
+        
+        updated = Grid.find_naked_triples(coll.cells, entity_type) or updated
 
         # Find where the is only one place for a number with the given collection
         indices = {}
@@ -270,6 +295,7 @@ class Grid:
                                     updated = True
 
         return updated
+        
 
     def cells_str(self, str_lengths, row, start, end):
         row_strings = []
@@ -324,3 +350,5 @@ if __name__ == '__main__':
     print(g)
     while g.solve():
         print(g)
+    #if not g.is_complete():
+      #  print(g.find_pairs())
